@@ -64,7 +64,7 @@ model Salary {
   stock              Int      @default(0)
   total_compensation Int
   source             Source
-  confidence_score   Int
+  confidence_score   Float
   is_verified        Boolean  @default(false)
   submitted_at       DateTime @default(now())
 
