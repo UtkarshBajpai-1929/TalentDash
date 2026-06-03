@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { displayCompanyName, normalizeCompanyName, slugFromCompanyName } from "@/lib/company";
+import { isMissingPrismaTableError, logMissingPrismaTableError } from "@/lib/prisma-errors";
 import { prisma } from "@/lib/prisma";
 import { computeTotalCompensation } from "@/lib/salary";
 import { validateSalaryPayload } from "@/lib/validation";
@@ -9,11 +10,11 @@ export async function POST(request: Request) {
     const payload = await request.json();
     const result = validateSalaryPayload(payload);
 
-if (!result.data) {
-  return NextResponse.json(result.error, {
-    status: 400
-  });
-}
+    if (!result.data) {
+      return NextResponse.json(result.error, {
+        status: 400
+      });
+    }
     const input = result.data;
     const normalized_name = normalizeCompanyName(input.company_name);
     const slug = slugFromCompanyName(input.company_name);
@@ -40,33 +41,34 @@ if (!result.data) {
         headcount_range: input.headcount_range ?? "Unknown"
       }
     });
-const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
-const salaryLowerBound = Math.floor(input.base_salary * 0.9);
-const salaryUpperBound = Math.ceil(input.base_salary * 1.1);
-const duplicate = await prisma.salary.findFirst({
-  where: {
-    company_id: company.id,
-    role: input.role,
-    level: input.level,
-    location: input.location,
-    created_at: {
-      gte: fortyEightHoursAgo
-    },
-    base_salary: {
-      gte: salaryLowerBound,
-      lte: salaryUpperBound
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+    const salaryLowerBound = Math.floor(input.base_salary * 0.9);
+    const salaryUpperBound = Math.ceil(input.base_salary * 1.1);
+    const duplicate = await prisma.salary.findFirst({
+      where: {
+        company_id: company.id,
+        role: input.role,
+        level: input.level,
+        location: input.location,
+        submitted_at: {
+          gte: fortyEightHoursAgo
+        },
+        base_salary: {
+          gte: salaryLowerBound,
+          lte: salaryUpperBound
+        }
+      }
+    });
+
+    if (duplicate) {
+      return NextResponse.json(
+        {
+          error:
+            "A similar salary record for this company, role, level, and location was submitted in the last 48 hours."
+        },
+        { status: 409 }
+      );
     }
-  }
-});
-if (duplicate) {
-  return NextResponse.json(
-    {
-      error:
-        "A similar salary record for this company, role, level, and location was submitted in the last 48 hours."
-    },
-    { status: 409 }
-  );
-}
 
     const salary = await prisma.salary.create({
       data: {
@@ -89,6 +91,17 @@ if (duplicate) {
 
     return NextResponse.json({ data: salary }, { status: 201 });
   } catch (error) {
+    if (isMissingPrismaTableError(error)) {
+      logMissingPrismaTableError("POST /api/ingest-salary", error);
+      return NextResponse.json(
+        {
+          error:
+            "Database schema is not initialized. Run pending Prisma migrations before retrying."
+        },
+        { status: 503 }
+      );
+    }
+
     console.error("POST /api/ingest-salary failed", error);
     return NextResponse.json({ error: "Unable to ingest salary." }, { status: 500 });
   }
