@@ -1,3 +1,6 @@
+import type { Currency } from "@prisma/client";
+import { CURRENCY_RATES_TO_INR } from "@/lib/constants";
+
 export function computeTotalCompensation(base_salary: number, bonus = 0, stock = 0) {
   return base_salary + bonus + stock;
 }
@@ -17,6 +20,11 @@ export function formatMoney(value: number, currency: string) {
     currency,
     maximumFractionDigits: 0
   }).format(value);
+}
+
+export function convertSalaryValue(value: number, fromCurrency: Currency, toCurrency: Currency) {
+  const valueInInr = value * CURRENCY_RATES_TO_INR[fromCurrency];
+  return Math.round(valueInInr / CURRENCY_RATES_TO_INR[toCurrency]);
 }
 
 export function formatCompactMoney(value: number, currency: string) {
