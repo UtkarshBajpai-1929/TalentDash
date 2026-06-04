@@ -1,89 +1,288 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TalentDash
+
+TalentDash is a full-stack salary intelligence platform built to explore and compare software engineering salaries across companies, experience levels, locations, and roles.
+
+Built using **Next.js App Router**, **Prisma**, and **PostgreSQL (Neon)** with a strong focus on **server-side rendering, SEO, caching strategies, and production-grade architecture**.
+
+## Live Demo
+
+**Website:**
+https://talent-dash-sigma-puce.vercel.app
+
+---
+
+## Tech Stack
+
+### Frontend
+
+* Next.js 15 (App Router)
+* React
+* TypeScript
+* Tailwind CSS
+
+### Backend
+
+* Next.js API Routes
+* Prisma ORM
+* PostgreSQL (Neon)
+
+### Deployment
+
+* Vercel
+
+### SEO & Optimization
+
+* React Server Components
+* Incremental Static Regeneration (ISR)
+* Dynamic Metadata
+* JSON-LD Structured Data
+
+---
 
 ## Getting Started
 
-First, run the development server:
+Clone the repository:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repo-url>
+cd talentdash
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Install dependencies:
 
-## TalentDash Data Flow
-
-TalentDash is implemented as a full-stack App Router project:
-
-```txt
-PostgreSQL / Neon
--> Prisma
--> React Server Component
--> rendered HTML
+```bash
+npm install
 ```
 
-Server-rendered pages query Prisma directly from React Server Components. API routes remain for external clients, browser runtime boundaries, and the salary ingestion endpoint.
+Create a `.env` file in the root directory:
 
-The reviewer flow is:
+```env
+DATABASE_URL=your_database_url
+NEXT_PUBLIC_SITE_URL=your_site_url
+```
+
+Generate Prisma client:
+
+```bash
+npx prisma generate
+```
+
+Run database migrations:
+
+```bash
+npx prisma migrate dev
+```
+
+Seed the database:
 
 ```bash
 npx prisma db seed
 ```
 
-Then visit [http://localhost:3000/companies/amazon](http://localhost:3000/companies/amazon) to verify seeded database content, call `POST /api/ingest-salary` to add a salary record, and visit `/salaries` after an ISR revalidation cycle to see the new record in rendered HTML.
+Start the development server:
 
-## Rendering And Caching Strategy
+```bash
+npm run dev
+```
 
-`/salaries` uses React Server Components and queries Prisma directly through shared server data functions. It uses ISR with:
+Open:
+
+```txt
+http://localhost:3000
+```
+
+---
+
+## TalentDash Data Flow
+
+TalentDash follows a server-first architecture:
+
+```txt
+PostgreSQL (Neon)
+        ↓
+      Prisma
+        ↓
+React Server Components
+        ↓
+  Server Rendered HTML
+```
+
+Most pages query **Prisma directly inside React Server Components** instead of making unnecessary internal API calls. This improves:
+
+* SEO
+* Performance
+* Caching
+* Server-side rendering efficiency
+
+API routes are only used for:
+
+* Salary ingestion
+* External access
+* Interactive client-side features
+* Runtime boundaries
+
+---
+
+## Reviewer Flow
+
+Seed the database:
+
+```bash
+npx prisma db seed
+```
+
+Visit:
+
+```txt
+/companies/amazon
+```
+
+to verify seeded database content.
+
+Call:
+
+```txt
+POST /api/ingest-salary
+```
+
+using postman to add a salary record.
+
+Then visit:
+
+```txt
+/salaries
+```
+
+after ISR revalidation to see updated server-rendered data.
+
+---
+
+## Rendering & Caching Strategy
+
+### `/salaries`
+
+Uses **React Server Components** and queries Prisma directly.
+
+ISR:
 
 ```ts
 export const revalidate = 300;
 ```
 
-Salary listings are public content and can tolerate short-lived staleness, so they should not render dynamically on every request or make internal HTTP calls to their own API routes.
+Salary listings are public content and can tolerate short-lived staleness, so the page avoids request-time rendering and unnecessary internal API calls.
 
-`/companies/[slug]` uses static generation with a real Prisma-backed `generateStaticParams()` query:
+---
+
+### `/companies/[slug]`
+
+Uses **static generation** with Prisma-backed `generateStaticParams()`.
 
 ```ts
-const companies = await prisma.company.findMany({ select: { slug: true } });
+const companies = await prisma.company.findMany({
+  select: { slug: true },
+});
 ```
 
-Company pages are public SEO content. Existing company pages are generated from database slugs, and new companies appear after redeploy when `generateStaticParams()` runs again. The page also uses `revalidate = 3600` so company salary summaries can refresh without request-time rendering or an internal API roundtrip.
+ISR:
 
-`/compare` uses `revalidate = 86400` for the initial public salary option list, which is loaded directly through Prisma in the Server Component. The interactive comparison itself is client-driven and calls `/api/compare` only after the user selects two salary records, so the page does not require `force-dynamic`.
+```ts
+export const revalidate = 3600;
+```
 
-No page currently uses `export const dynamic = "force-dynamic"` because there is no authenticated, session-specific, admin, dashboard, or real-time page that requires request-time rendering.
+Company pages are public SEO-focused pages generated from database slugs.
 
-API responses set CDN cache headers:
+---
+
+### `/compare`
+
+Uses:
+
+```ts
+export const revalidate = 86400;
+```
+
+The salary option list is server-rendered and cached.
+
+The interactive comparison itself is client-driven and only calls:
+
+```txt
+/api/compare
+```
+
+after selecting salary records.
+
+No page currently uses:
+
+```ts
+export const dynamic = "force-dynamic";
+```
+
+because there are no authenticated dashboards, session-specific pages, or real-time features requiring request-time rendering.
+
+---
+
+## API Cache Strategy
+
+### Salaries API
 
 ```txt
 GET /api/salaries
-Cache-Control: public, s-maxage=300, stale-while-revalidate=3600
 
-GET /api/companies/:slug
-Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400
+Cache-Control:
+public, s-maxage=300,
+stale-while-revalidate=3600
 ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Company API
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```txt
+GET /api/companies/:slug
 
-## Learn More
+Cache-Control:
+public, s-maxage=3600,
+stale-while-revalidate=86400
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## SEO Strategy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+TalentDash is optimized for discoverability and indexing using:
 
-## Deploy on Vercel
+* Dynamic metadata
+* Canonical URLs
+* Open Graph tags
+* JSON-LD structured data
+* Server-rendered public pages
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project Goals
+
+The goal of this project was to build a **real-world production-style application** with:
+
+* Clean architecture
+* Scalable database design
+* Proper caching strategy
+* SEO best practices
+* Server-side rendering
+* Full-stack integration
+
+---
+
+## Learnings
+
+While building TalentDash, I learned:
+
+* Next.js App Router architecture
+* Prisma + PostgreSQL workflow
+* React Server Components
+* Incremental Static Regeneration (ISR)
+* SEO for production applications
+* API route design
+* Database modeling
+* Real-world folder structuring
+* Performance optimization
+
+
+

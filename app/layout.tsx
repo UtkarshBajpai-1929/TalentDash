@@ -62,8 +62,8 @@ export default function RootLayout({
             <Link
               href="/salaries"
             >
-              <span className="text-xl font-bold tracking-tight text-(--text-deep)">Talent</span>
-              <span className="text-xl font-bold tracking-tight text-[#ff5a5f]">Dash</span>
+              <span className="text-xl font-bold tracking-tight text-[#ff5a5f]">Talent</span>
+              <span className="text-xl font-bold tracking-tight text-(--text-deep)">Dash</span>
             </Link>
             <nav className="flex items-center gap-2 text-sm font-medium text-(--text-muted)">
               <Link
