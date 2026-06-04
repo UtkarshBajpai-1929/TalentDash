@@ -119,10 +119,6 @@ const salaries: SalarySeed[] = [
 })) as SalarySeed[];
 
 async function main() {
-  await prisma.salary.deleteMany();
-  await prisma.company.deleteMany();
-
-  // Seed companies
   for (const company of companies) {
     const normalized_name = normalizeCompanyName(company.name);
 
@@ -144,7 +140,6 @@ async function main() {
     });
   }
 
-  // Fetch all companies once
   const allCompanies = await prisma.company.findMany();
   const companyMap = new Map(
     allCompanies.map((company) => [
@@ -153,7 +148,6 @@ async function main() {
     ])
   );
 
-  // Prepare salary data
   const salaryData = salaries.map((salary) => {
     const normalized_name = normalizeCompanyName(salary.company);
     const companyId = companyMap.get(normalized_name);
@@ -191,17 +185,45 @@ async function main() {
     };
   });
 
-  // Insert all salaries at once
-  await prisma.salary.createMany({
-    data: salaryData
-  });
+  let insertedSalaryCount = 0;
+
+  for (const salary of salaryData) {
+    const existingSalary = await prisma.salary.findFirst({
+      where: {
+        company_id: salary.company_id,
+        role: salary.role,
+        level: salary.level,
+        location: salary.location,
+        currency: salary.currency,
+        experience_years: salary.experience_years,
+        base_salary: salary.base_salary,
+        bonus: salary.bonus,
+        stock: salary.stock,
+        source: salary.source
+      },
+      select: { id: true }
+    });
+
+    if (existingSalary) {
+      continue;
+    }
+
+    await prisma.salary.create({
+      data: salary
+    });
+    insertedSalaryCount += 1;
+  }
+
+  return insertedSalaryCount;
 }
 
 
 main()
-  .then(async () => {
+  .then(async (insertedSalaryCount) => {
     await prisma.$disconnect();
-    console.log(`Seeded ${companies.length} companies and ${salaries.length} salary records.`);
+    console.log(
+      `Seed complete: upserted ${companies.length} companies and inserted ${insertedSalaryCount} new salary records.`
+    );
   })
   .catch(async (error) => {
     console.error(error);

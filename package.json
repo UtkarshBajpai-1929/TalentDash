@@ -3,15 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "prisma migrate dev && prisma generate && node scripts/prisma-startup-check.mjs && next dev",
+    "dev": "prisma migrate dev && prisma generate && prisma db seed && node scripts/prisma-startup-check.mjs && next dev",
     "build": "prisma generate && next build",
-    "start": "prisma migrate deploy && prisma generate && node scripts/prisma-startup-check.mjs && next start",
+    "start": "prisma migrate deploy && prisma generate && prisma db seed && node scripts/prisma-startup-check.mjs && next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:check": "node scripts/prisma-startup-check.mjs",
+    "db:init": "prisma migrate deploy && prisma generate && prisma db seed && node scripts/prisma-startup-check.mjs",
     "db:setup": "tsx prisma/setup-db.ts",
     "seed": "prisma db seed"
   },
