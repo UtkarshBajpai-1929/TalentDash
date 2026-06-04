@@ -2,20 +2,21 @@
   "name": "talentdash",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "dev": "prisma migrate dev && prisma generate && prisma db seed && node scripts/prisma-startup-check.mjs && next dev",
-    "build": "prisma generate && next build",
-    "start": "prisma migrate deploy && prisma generate && prisma db seed && node scripts/prisma-startup-check.mjs && next start",
-    "lint": "next lint",
-    "typecheck": "tsc --noEmit",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:deploy": "prisma migrate deploy",
-    "prisma:check": "node scripts/prisma-startup-check.mjs",
-    "db:init": "prisma migrate deploy && prisma generate && prisma db seed && node scripts/prisma-startup-check.mjs",
-    "db:setup": "tsx prisma/setup-db.ts",
-    "seed": "prisma db seed"
-  },
+ "scripts": {
+  "dev": "prisma generate && next dev",
+  "build": "prisma generate && next build",
+  "start": "next start",
+  "lint": "next lint",
+  "typecheck": "tsc --noEmit",
+
+  "prisma:generate": "prisma generate",
+  "prisma:migrate": "prisma migrate dev",
+  "prisma:deploy": "prisma migrate deploy",
+
+  "db:init": "prisma migrate deploy && prisma generate && prisma db seed",
+  "db:setup": "tsx prisma/setup-db.ts",
+  "seed": "prisma db seed"
+},
   "dependencies": {
     "@prisma/client": "^6.9.0",
     "next": "^15.3.3",
