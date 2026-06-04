@@ -1,14 +1,12 @@
-export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { SalaryTable } from "@/components/features/salary-table";
 import { StatCard } from "@/components/ui/stat-card";
 import { Badge } from "@/components/ui/badge";
-import { fetchApi } from "@/lib/api";
+import { getCompanyData } from "@/lib/company-data";
 import { prisma } from "@/lib/prisma";
 import { formatCompactMoney } from "@/lib/salary";
-import type { CompanyApiResponse } from "@/types/salary";
 import type { Level } from "@prisma/client";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://talentdash.com";
@@ -67,7 +65,7 @@ function levelBarColor(level: string) {
 
 export default async function CompanyPage({ params }: PageProps) {
   const { slug } = await params;
-  const data = await fetchApi<CompanyApiResponse>(`/api/companies/${slug}`).catch(() => null);
+  const data = await getCompanyData(slug);
   if (!data) notFound();
 
   const { company, salaries, median_total_compensation: medianTotal, level_distribution: levelDistribution } = data;

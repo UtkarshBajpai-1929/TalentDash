@@ -1,16 +1,11 @@
-export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import { CompareClient } from "@/components/features/compare-client";
-import { fetchApi } from "@/lib/api";
-import type { SalariesApiResponse } from "@/types/salary";
+import { parseSalaryFilters } from "@/lib/api";
+import { getSalariesData } from "@/lib/salaries-data";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://talentdash.com";
 
 export const revalidate = 86400;
-
-type PageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "Compare Software Engineer Compensation Packages | TalentDash";
@@ -28,10 +23,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ComparePage(_: PageProps) {
-  const salaryList = await fetchApi<SalariesApiResponse>("/api/salaries", new URLSearchParams({ limit: "100", sort: "total_comp_desc" }), {
-    next: { revalidate: 86400 }
-  });
+export default async function ComparePage() {
+  const filters = parseSalaryFilters(new URLSearchParams({ limit: "100", sort: "total_comp_desc" }));
+  const salaryList = await getSalariesData(filters);
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

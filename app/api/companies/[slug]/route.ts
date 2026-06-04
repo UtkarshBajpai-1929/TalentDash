@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { median } from "@/lib/salary";
+import { getCompanyData } from "@/lib/company-data";
 
 type Params = {
   params: Promise<{ slug: string }>;
@@ -9,34 +8,14 @@ type Params = {
 export async function GET(_request: Request, { params }: Params) {
   try {
     const { slug } = await params;
-    const company = await prisma.company.findUnique({
-      where: { slug },
-      include: {
-        salaries: {
-          orderBy: { total_compensation: "desc" },
-          include: { company: true }
-        }
-      }
-    });
+    const data = await getCompanyData(slug);
 
-    if (!company) {
+    if (!data) {
       return NextResponse.json({ error: "Company not found." }, { status: 404 });
     }
 
-    const level_distribution = company.salaries.reduce<Record<string, number>>((acc, salary) => {
-      acc[salary.level] = (acc[salary.level] ?? 0) + 1;
-      return acc;
-    }, {});
-
-    const { salaries, ...companyDetails } = company;
-
     return NextResponse.json(
-      {
-        company: companyDetails,
-        salaries,
-        median_total_compensation: median(company.salaries.map((salary) => salary.total_compensation)),
-        level_distribution
-      },
+      data,
       {
         headers: {
           "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400"

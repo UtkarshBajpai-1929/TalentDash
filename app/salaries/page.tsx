@@ -1,15 +1,14 @@
-export const dynamic = "force-dynamic";
 import { SalaryFilters } from "@/components/features/salary-filters";
 import { SalaryTable } from "@/components/features/salary-table";
 import { Pagination } from "@/components/features/pagination";
 import { StatCard } from "@/components/ui/stat-card";
-import { fetchApi, parseSalaryFilters } from "@/lib/api";
+import { parseSalaryFilters } from "@/lib/api";
+import { getSalariesData } from "@/lib/salaries-data";
 import { formatCompactMoney } from "@/lib/salary";
-import type { SalariesApiResponse } from "@/types/salary";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://talentdash.com";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 export async function generateMetadata() {
   const title = "Software Engineer Salaries in India | TalentDash";
@@ -45,7 +44,7 @@ export default async function SalariesPage({ searchParams }: PageProps) {
   const resolvedSearchParams = await searchParams;
   const urlSearchParams = toURLSearchParams(resolvedSearchParams);
   const filters = parseSalaryFilters(urlSearchParams);
-  const data = await fetchApi<SalariesApiResponse>("/api/salaries", urlSearchParams);
+  const data = await getSalariesData(filters);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Dataset",
