@@ -3,9 +3,17 @@ import { DISPLAY_CURRENCIES, LEVELS, SORTS } from "@/lib/constants";
 import type { SalaryFilters, SalarySort } from "@/types/salary";
 
 export function getAppBaseUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "http://localhost:3000";
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+  }
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  return process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : "";
 }
 
 async function getRequestBaseUrl() {

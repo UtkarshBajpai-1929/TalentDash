@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import { CompareClient } from "@/components/features/compare-client";
 import { fetchApi } from "@/lib/api";
@@ -27,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ComparePage(_props: PageProps) {
+export default async function ComparePage(_: PageProps) {
   const salaryList = await fetchApi<SalariesApiResponse>("/api/salaries", new URLSearchParams({ limit: "100", sort: "total_comp_desc" }), {
     next: { revalidate: 86400 }
   });

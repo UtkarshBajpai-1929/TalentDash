@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { SalaryFilters } from "@/components/features/salary-filters";
 import { SalaryTable } from "@/components/features/salary-table";
 import { Pagination } from "@/components/features/pagination";
