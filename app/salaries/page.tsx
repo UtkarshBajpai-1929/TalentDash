@@ -6,13 +6,13 @@ import { parseSalaryFilters } from "@/lib/api";
 import { getSalariesData } from "@/lib/salaries-data";
 import { formatCompactMoney } from "@/lib/salary";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://talentdash.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://talent-dash-sigma-puce.vercel.app";
 
 export const revalidate = 300;
 
 export async function generateMetadata() {
   const title = "Software Engineer Salaries in India | TalentDash";
-  const description = "Verified compensation data for Software Engineers in India. Browse salaries by company, role, level, location and total compensation.";
+  const description = "Compare Software Engineer salaries in India by company,experience, level, location, and total compensation.Explore verified salary data for Google, Microsoft, Amazon,and top tech companies."
 
   return {
     title,
@@ -26,7 +26,15 @@ export async function generateMetadata() {
     }
   };
 }
-
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: 'TalentDash India Tech Salary Data',
+  description: 'Structured compensation data for software engineers and tech professionals in India',
+  url: 'https://talent-dash-sigma-puce.vercel.app/salaries',
+  creator: { '@type': 'Organization', name: 'TalentDash' },
+  keywords: ['salary', 'compensation', 'software engineer', 'India', 'tech jobs','software development'],
+};
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };

@@ -3,7 +3,7 @@ import { CompareClient } from "@/components/features/compare-client";
 import { parseSalaryFilters } from "@/lib/api";
 import { getSalariesData } from "@/lib/salaries-data";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://talentdash.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://talent-dash-sigma-puce.vercel.app";
 
 export const revalidate = 86400;
 
@@ -22,6 +22,15 @@ export async function generateMetadata(): Promise<Metadata> {
     }
   };
 }
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Compare Software Engineer Salaries in India",
+  description:
+    "Compare software engineer salaries, compensation, and pay trends across tech companies in India.",
+  url: `${siteUrl}/compare`,
+  keywords: ["salary comparison", "software engineer salary india", "compare tech salaries", "engineering compensation", "salary benchmark"]
+};
 
 export default async function ComparePage() {
   const filters = parseSalaryFilters(new URLSearchParams({ limit: "100", sort: "total_comp_desc" }));

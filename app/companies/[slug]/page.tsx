@@ -8,8 +8,9 @@ import { getCompanyData } from "@/lib/company-data";
 import { prisma } from "@/lib/prisma";
 import { formatCompactMoney } from "@/lib/salary";
 import type { Level } from "@prisma/client";
+import { slugFromCompanyName } from "@/lib/company";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://talentdash.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://talent-dash-sigma-puce.vercel.app/";
 
 export const revalidate = 3600;
 
@@ -51,10 +52,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       url: `${siteUrl}/companies/${slug}`,
       type: "website"
-    }
+    },
   };
 }
-
 function levelBarColor(level: string) {
   if (level === "L3" || level === "SDE_I") return "#e2e8f0";
   if (level === "L4" || level === "SDE_II") return "#dbeafe";
