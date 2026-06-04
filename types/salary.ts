@@ -113,6 +113,7 @@ export type SalaryInput = {
   base_salary: number;
   bonus?: number;
   stock?: number;
+  total_compensation: number;
   source: Source;
   confidence_score?: number;
   is_verified?: boolean;
