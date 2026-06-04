@@ -1,9 +1,9 @@
-const loading = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
+import { TableSkeleton } from "@/components/ui/skeleton";
 
-export default loading
+export default function CompanyLoading() {
+  return (
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <TableSkeleton />
+    </main>
+  );
+}
