@@ -74,6 +74,12 @@ export default function RootLayout({
               </Link>
               <Link
                 className="rounded-md px-3 py-2 hover:bg-[#f7f7f7] hover:text-(--text-deep)"
+                href="/companies"
+              >
+                Companies
+              </Link>
+              <Link
+                className="rounded-md px-3 py-2 hover:bg-[#f7f7f7] hover:text-(--text-deep)"
                 href="/compare"
               >
                 Compare
