@@ -68,12 +68,23 @@ export default async function CompanyPage({ params }: PageProps) {
   if (!data) notFound();
 
   const { company, salaries, median_total_compensation: medianTotal, level_distribution: levelDistribution } = data;
-  const totals = salaries.map((salary) => salary.total_compensation);
-  const minTotal = totals.length > 0 ? Math.min(...totals) : 0;
-  const maxTotal = totals.length > 0 ? Math.max(...totals) : 0;
-  const currency = salaries[0]?.currency ?? "INR";
-  const headquartersCity = company.headquarters.split(",")[0];
-  const jsonLd = {
+  const updatedSalaries = salaries.filter(salary=> salary.currency === "INR");
+  const { minTotal, maxTotal } = updatedSalaries.reduce(
+  (acc, salary) => ({
+    minTotal: Math.min(acc.minTotal, salary.total_compensation),
+    maxTotal: Math.max(acc.maxTotal, salary.total_compensation),
+  }),
+  {
+    minTotal: Infinity,
+    maxTotal: -Infinity,
+  }
+);
+
+const finalMin = minTotal === Infinity ? 0 : minTotal;
+const finalMax = maxTotal === -Infinity ? 0 : maxTotal;
+const currency = salaries[0]?.currency ?? "INR";
+const headquartersCity = company.headquarters.split(",")[0];
+const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Dataset",
     name: `Software Engineer Salaries at ${company.name} India`,
@@ -98,7 +109,7 @@ export default async function CompanyPage({ params }: PageProps) {
 
       <div className="mt-6 grid gap-4 md:grid-cols-4">
         <StatCard label="Median Total Comp" value={formatCompactMoney(medianTotal, currency)} valueClassName="text-3xl text-[#ff5a5f]" />
-        <StatCard label="Compensation range" value={`${formatCompactMoney(minTotal, currency)} - ${formatCompactMoney(maxTotal, currency)}`} />
+        <StatCard label="Compensation range" value={`${formatCompactMoney(finalMin, currency)} - ${formatCompactMoney(finalMax, currency)}`} />
         <StatCard label="Record count" value={`${salaries.length.toLocaleString("en-IN")} data points`} />
         <StatCard label="Top level" value={Object.entries(levelDistribution).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A"} />
       </div>
