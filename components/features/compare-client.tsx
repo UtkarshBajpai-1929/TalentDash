@@ -195,7 +195,7 @@ export function CompareClient({ salaries }: { salaries: SalaryRecord[] }) {
               <div className="min-w-0 text-right">
                 <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
                   {higherId === comparison.right.id ? (
-                    <span className="shrink-0 rounded-full bg-[#ff5a5f] px-2.5 py-1 text-xs font-semibold text-white">
+                    <span className="shrink-0 rounded-full bg-[#0369A1] px-2.5 py-1 text-xs font-semibold text-white">
                       Higher TC ↑
                     </span>
                   ) : null}
