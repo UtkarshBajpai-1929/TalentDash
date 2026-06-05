@@ -84,11 +84,16 @@ const jsonLd = {
       </div>
 
       <div className="mt-6">
-        <SalaryFilters filters={filters} facets={data.facets} />
+        <SalaryFilters
+          key={urlSearchParams.toString()}
+          filters={filters}
+          facets={data.facets}
+        />
       </div>
       <div className="mt-6">
         <SalaryTable salaries={data.salaries} displayCurrency={filters.currency ?? "INR"} searchParams={urlSearchParams} sort={filters.sort} />
       </div>
+
       <div className="mt-4">
         <Pagination page={data.pagination.page} totalPages={data.pagination.total_pages} total={data.pagination.total} limit={data.pagination.limit} searchParams={urlSearchParams} />
       </div>

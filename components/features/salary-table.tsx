@@ -48,7 +48,7 @@ export function SalaryTable({
 }) {
   if (salaries.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-[var(--border)] bg-white p-10 text-center">
+      <div className="rounded-lg border border-dashed border-(--border) bg-white p-10 text-center">
         <h2 className="text-lg font-semibold text-[var(--text-deep)]">No records found for these filters. Try removing a filter.</h2>
         <Link className="mt-4 inline-flex font-semibold text-[#0369A1]" href="/salaries">
           Clear all filters

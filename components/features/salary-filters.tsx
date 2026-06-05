@@ -1,7 +1,6 @@
 "use client";
-
-import { useState } from "react";
-import Link from "next/link";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { DISPLAY_CURRENCIES, LEVELS } from "@/lib/constants";
 import type {
   SalariesApiResponse,
@@ -12,15 +11,61 @@ type Props = {
   facets: SalariesApiResponse["facets"];
 };
 export function SalaryFilters({ filters, facets }: Props) {
+  const router = useRouter();
   const selectedLevels = new Set(filters.levels ?? []);
+  const formRef = useRef<HTMLFormElement>(null);
+  const companySubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const [selectedCurrency, setSelectedCurrency] = useState(
     filters.currency ?? "INR",
   );
+
+  function applyFilters() {
+    if (!formRef.current) return;
+
+    const formData = new FormData(formRef.current);
+    const nextParams = new URLSearchParams();
+
+    for (const [key, value] of formData.entries()) {
+      const stringValue = String(value).trim();
+      if (!stringValue) continue;
+      nextParams.append(key, stringValue);
+    }
+
+    nextParams.set("page", "1");
+
+    router.replace(`/salaries?${nextParams.toString()}`, { scroll: false });
+  }
+
+  function submitCompanyFilter() {
+    if (companySubmitTimerRef.current) {
+      clearTimeout(companySubmitTimerRef.current);
+    }
+
+    companySubmitTimerRef.current = setTimeout(applyFilters, 500);
+  }
+
+  function clearFilters() {
+    if (companySubmitTimerRef.current) {
+      clearTimeout(companySubmitTimerRef.current);
+    }
+
+    formRef.current?.reset();
+    setSelectedCurrency("INR");
+    router.replace("/salaries", { scroll: false });
+  }
+
   return (
     <form
+      ref={formRef}
       action="/salaries"
       method="GET"
+      onSubmit={(event) => {
+        event.preventDefault();
+        applyFilters();
+      }}
       className="grid gap-4 rounded-lg border border-[var(--border)] bg-white p-4"
     >
       <div className="grid gap-3 md:grid-cols-4">
@@ -32,6 +77,7 @@ export function SalaryFilters({ filters, facets }: Props) {
             name="company"
             placeholder="Amazon"
             defaultValue={filters.company ?? ""}
+            onChange={submitCompanyFilter}
           />
         </label>
         <label className="grid gap-1 text-sm font-semibold text-[var(--text-deep)]">
@@ -40,6 +86,7 @@ export function SalaryFilters({ filters, facets }: Props) {
             className="focus-ring rounded-md border border-[var(--border)] px-3 py-2 font-normal"
             name="role"
             defaultValue={filters.role ?? ""}
+            onChange={applyFilters}
           >
             <option value="">All roles</option>
 
@@ -56,6 +103,7 @@ export function SalaryFilters({ filters, facets }: Props) {
             className="focus-ring rounded-md border border-[var(--border)] px-3 py-2 font-normal"
             name="location"
             defaultValue={filters.location ?? ""}
+            onChange={applyFilters}
           >
             <option value="">All locations</option>
 
@@ -88,7 +136,10 @@ export function SalaryFilters({ filters, facets }: Props) {
                     name="currency"
                     value={currency}
                     checked={isSelected}
-                    onChange={() => setSelectedCurrency(currency)}
+                    onChange={() => {
+                      setSelectedCurrency(currency);
+                      requestAnimationFrame(applyFilters);
+                    }}
                   />
                   <span>{currency}</span>
                 </label>
@@ -112,6 +163,7 @@ export function SalaryFilters({ filters, facets }: Props) {
                 name="level"
                 value={level}
                 defaultChecked={selectedLevels.has(level)}
+                onChange={applyFilters}
               />
               {level}
             </label>
@@ -121,17 +173,12 @@ export function SalaryFilters({ filters, facets }: Props) {
       <input type="hidden" name="sort" value={filters.sort} />
       <div className="flex flex-wrap gap-2">
         <button
-          className="focus-ring rounded-md bg-[var(--accent)] px-4 py-2 font-semibold text-white hover:bg-[#e04e53]"
-          type="submit"
-        >
-          Apply filters
-        </button>
-        <Link
           className="focus-ring rounded-md border border-[var(--border)] px-4 py-2 font-semibold text-[var(--text-deep)] hover:bg-[#f7f7f7]"
-          href="/salaries"
+          type="button"
+          onClick={clearFilters}
         >
           Clear all filters
-        </Link>
+        </button>
       </div>
     </form>
   );
