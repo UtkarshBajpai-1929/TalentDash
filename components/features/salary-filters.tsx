@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { DISPLAY_CURRENCIES, LEVELS } from "@/lib/constants";
 import type {
@@ -12,6 +12,7 @@ type Props = {
 };
 export function SalaryFilters({ filters, facets }: Props) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const selectedLevels = new Set(filters.levels ?? []);
   const formRef = useRef<HTMLFormElement>(null);
   const companySubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -36,7 +37,9 @@ export function SalaryFilters({ filters, facets }: Props) {
 
     nextParams.set("page", "1");
 
-    router.replace(`/salaries?${nextParams.toString()}`, { scroll: false });
+    startTransition(() => {
+      router.replace(`/salaries?${nextParams.toString()}`, { scroll: false });
+    });
   }
 
   function submitCompanyFilter() {
@@ -54,7 +57,9 @@ export function SalaryFilters({ filters, facets }: Props) {
 
     formRef.current?.reset();
     setSelectedCurrency("INR");
-    router.replace("/salaries", { scroll: false });
+    startTransition(() => {
+      router.replace("/salaries", { scroll: false });
+    });
   }
 
   return (
@@ -180,6 +185,14 @@ export function SalaryFilters({ filters, facets }: Props) {
           Clear all filters
         </button>
       </div>
+      {isPending ? (
+        <p
+          className="text-sm font-semibold text-[#ff5a5f]"
+          aria-live="polite"
+        >
+          Loading...
+        </p>
+      ) : null}
     </form>
   );
 }
