@@ -10,9 +10,10 @@ const sortableColumns: { label: string; key?: string; className?: string }[] = [
   { label: "Level", key: "level" },
   { label: "Location", key: "location" },
   { label: "Experience", key: "experience" },
+  {label: "Confidence Score", key:"confidence_score"},
   { label: "Base Salary", key: "base_salary" },
   { label: "Stock", key: "stock" },
-  { label: "Total Comp", key: "total_comp" }
+  { label: "Total Comp", key: "total_comp" },
 ];
 
 function toggleSort(searchParams: URLSearchParams, key: string) {
@@ -90,6 +91,7 @@ export function SalaryTable({
                 </td>
                 <td className="whitespace-nowrap px-4 py-4">{salary.location}</td>
                 <td className="whitespace-nowrap px-4 py-4">{salary.experience_years} yrs</td>
+                <td className="whitespace-nowrap px-4 py-4">{salary.confidence_score || "NA"} </td>
                 <td className="whitespace-nowrap px-4 py-4">{moneyOrDash(salary.base_salary, salary.currency, displayCurrency)}</td>
                 <td className="whitespace-nowrap px-4 py-4">{moneyOrDash(salary.stock, salary.currency, displayCurrency)}</td>
                 <td className="whitespace-nowrap px-4 py-4 text-[18px] font-bold text-(--accent)">

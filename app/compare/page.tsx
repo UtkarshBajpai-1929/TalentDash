@@ -22,7 +22,11 @@ export async function generateMetadata(): Promise<Metadata> {
     }
   };
 }
-const jsonLd = {
+
+export default async function ComparePage() {
+  const filters = parseSalaryFilters(new URLSearchParams({ limit: "100", sort: "total_comp_desc" }));
+  const salaryList = await getSalariesData(filters);
+  const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebPage",
   name: "Compare Software Engineer Salaries in India",
@@ -31,13 +35,9 @@ const jsonLd = {
   url: `${siteUrl}/compare`,
   keywords: ["salary comparison", "software engineer salary india", "compare tech salaries", "engineering compensation", "salary benchmark"]
 };
-
-export default async function ComparePage() {
-  const filters = parseSalaryFilters(new URLSearchParams({ limit: "100", sort: "total_comp_desc" }));
-  const salaryList = await getSalariesData(filters);
-
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div>
         <p className="text-sm font-semibold uppercase tracking-wide text-[var(--accent)]">Compensation compare</p>
         <h1 className="mt-2 text-3xl font-bold text-[var(--text-deep)]">Compare Software Engineer Compensation Packages</h1>

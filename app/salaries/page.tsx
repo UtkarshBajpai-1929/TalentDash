@@ -26,15 +26,6 @@ export async function generateMetadata() {
     }
   };
 }
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Dataset',
-  name: 'TalentDash India Tech Salary Data',
-  description: 'Structured compensation data for software engineers and tech professionals in India',
-  url: 'https://talent-dash-sigma-puce.vercel.app/salaries',
-  creator: { '@type': 'Organization', name: 'TalentDash' },
-  keywords: ['salary', 'compensation', 'software engineer', 'India', 'tech jobs','software development'],
-};
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -54,13 +45,14 @@ export default async function SalariesPage({ searchParams }: PageProps) {
   const filters = parseSalaryFilters(urlSearchParams);
   const data = await getSalariesData(filters);
   const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Dataset",
-    name: "Software Engineer Salaries in India",
-    description: "Structured compensation data for Software Engineers across Indian technology companies and experience levels",
-    keywords: ["salary", "compensation", "Software Engineer", "India", "L4", "L5"]
-  };
-
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: 'TalentDash India Tech Salary Data',
+  description: 'Structured compensation data for software engineers and tech professionals in India',
+  url: 'https://talent-dash-sigma-puce.vercel.app/salaries',
+  creator: { '@type': 'Organization', name: 'TalentDash' },
+  keywords: ['salary', 'compensation', 'software engineer', 'India', 'tech jobs','software development'],
+ };
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -73,9 +65,9 @@ export default async function SalariesPage({ searchParams }: PageProps) {
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-3">
-        <StatCard label="Records" value={data.pagination.total.toLocaleString("en-IN")} detail="Matching current filters" />
-        <StatCard label="Average TC" value={formatCompactMoney(data.stats.average_total_compensation, filters.currency ?? "INR")} detail="Across visible dataset" />
-        <StatCard label="Highest TC" value={formatCompactMoney(data.stats.highest_total_compensation, filters.currency ?? "INR")} detail="Sorted records supported" />
+        <StatCard label="Records" valueClassName="text-[#ff5a5f]" value={data.pagination.total.toLocaleString("en-IN")} detail="Matching current filters" />
+        <StatCard label="Average TC" valueClassName="text-[#ff5a5f]" value={formatCompactMoney(data.stats.average_total_compensation, filters.currency ?? "INR")} detail="Across visible dataset" />
+        <StatCard label="Highest TC" valueClassName="text-[#ff5a5f]" value={formatCompactMoney(data.stats.highest_total_compensation, filters.currency ?? "INR")} detail="Sorted records supported" />
       </div>
 
       <div className="mt-6">

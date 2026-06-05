@@ -126,12 +126,22 @@ export function CompareClient({ salaries }: { salaries: SalaryRecord[] }) {
 
   return (
     <div className="mt-6">
+      {/* Selector panel — key fix: w-full + min-w-0 + overflow-hidden on every flex/grid child */}
       <div className="grid gap-3 rounded-lg border border-[var(--border)] bg-white p-4 md:grid-cols-2">
         {(["s1", "s2"] as const).map((name) => (
-          <label key={name} className="grid gap-1 text-sm font-semibold text-[var(--text-deep)]">
+          <label key={name} className="flex min-w-0 flex-col gap-1 text-sm font-semibold text-(--text-deep)">
             {name === "s1" ? "First salary record" : "Second salary record"}
+            {/* 
+              THE FIX:
+              - `w-full`      → fills the label's width
+              - `min-w-0`     → allows shrinking below intrinsic content width
+              - `max-w-full`  → hard cap so it can never overflow the parent
+              - `truncate` on the select itself clips long option text
+              Native <select> intrinsic width is driven by the longest <option>.
+              Without these constraints it punches through the grid cell on mobile.
+            */}
             <select
-              className="focus-ring rounded-md border border-[var(--border)] px-3 py-2 font-normal"
+              className="focus-ring w-full min-w-0 max-w-full truncate rounded-md border border-[var(--border)] px-3 py-2 font-normal"
               value={name === "s1" ? s1 : s2}
               onChange={(event) => updateSelection(name, event.target.value)}
             >
@@ -146,44 +156,94 @@ export function CompareClient({ salaries }: { salaries: SalaryRecord[] }) {
         ))}
       </div>
 
-      {error ? <div className="mt-6 rounded-lg border border-[#ffd6d3] bg-[#fff6f5] p-4 text-sm font-semibold text-[#D93025]">{error}</div> : null}
-      {isPending ? <div className="mt-6 rounded-lg border border-[var(--border)] bg-white p-4 text-sm text-[var(--text-muted)]">Updating comparison...</div> : null}
+      {error ? (
+        <div className="mt-6 rounded-lg border border-[#ffd6d3] bg-[#fff6f5] p-4 text-sm font-semibold text-[#D93025]">
+          {error}
+        </div>
+      ) : null}
+
+      {isPending ? (
+        <div className="mt-6 rounded-lg border border-[var(--border)] bg-white p-4 text-sm text-[var(--text-muted)]">
+          Updating comparison...
+        </div>
+      ) : null}
 
       {comparison ? (
         <div className="mt-6 overflow-hidden rounded-lg border border-[var(--border)] bg-white">
-          <div className="grid grid-cols-[1fr_auto_1fr] border-b border-[var(--border)] bg-[#fbfbfb] px-4 py-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-bold text-[var(--text-deep)]">{comparison.left.company.name}</h2>
-                {higherId === comparison.left.id ? <span className="rounded-full bg-[#0369A1] px-2.5 py-1 text-xs font-semibold text-white">Higher TC ↑</span> : null}
+          {/* Header — on mobile stack vertically; on md+ keep the 3-col layout */}
+          <div className="border-b border-[var(--border)] bg-[#fbfbfb] px-4 py-4">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-x-2">
+              {/* Left company */}
+              <div className="min-w-0">
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <h2 className="truncate font-bold text-[var(--text-deep)]">{comparison.left.company.name}</h2>
+                  {higherId === comparison.left.id ? (
+                    <span className="shrink-0 rounded-full bg-[#0369A1] px-2.5 py-1 text-xs font-semibold text-white">
+                      Higher TC ↑
+                    </span>
+                  ) : null}
+                </div>
+                <p className="mt-1 truncate text-sm text-[var(--text-muted)]">{comparison.left.role}</p>
               </div>
-              <p className="mt-1 text-sm text-[var(--text-muted)]">{comparison.left.role}</p>
-            </div>
-            <div className="px-6 text-center text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Delta</div>
-            <div className="text-right">
-              <div className="flex items-center justify-end gap-2">
-                {higherId === comparison.right.id ? <span className="rounded-full bg-[#ff5a5f] px-2.5 py-1 text-xs font-semibold text-white">Higher TC ↑</span> : null}
-                <h2 className="font-bold text-[var(--text-deep)]">{comparison.right.company.name}</h2>
+
+              {/* Delta label */}
+              <div className="px-3 text-center text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                Delta
               </div>
-              <p className="mt-1 text-sm text-[var(--text-muted)]">{comparison.right.role}</p>
+
+              {/* Right company */}
+              <div className="min-w-0 text-right">
+                <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
+                  {higherId === comparison.right.id ? (
+                    <span className="shrink-0 rounded-full bg-[#ff5a5f] px-2.5 py-1 text-xs font-semibold text-white">
+                      Higher TC ↑
+                    </span>
+                  ) : null}
+                  <h2 className="truncate font-bold text-[var(--text-deep)]">{comparison.right.company.name}</h2>
+                </div>
+                <p className="mt-1 truncate text-sm text-[var(--text-muted)]">{comparison.right.role}</p>
+              </div>
             </div>
           </div>
 
+          {/* Rows */}
           <div className="divide-y divide-[var(--border)]">
             {rows.map(([label, keyName], index) => (
-              <div key={keyName} className={`grid grid-cols-[1fr_auto_1fr] items-center px-4 py-4 text-sm ${index % 2 === 1 ? "bg-[#FAFAFA]" : "bg-white"}`}>
-                <div>
+              <div
+                key={keyName}
+                className={`grid grid-cols-[1fr_auto_1fr] items-center px-4 py-4 text-sm ${
+                  index % 2 === 1 ? "bg-[#FAFAFA]" : "bg-white"
+                }`}
+              >
+                {/* Left value */}
+                <div className="min-w-0">
                   <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">{label}</p>
-                  <div className={`mt-1 ${keyName === "total_compensation" ? "text-[18px] font-bold text-[#ff5a5f]" : "font-medium text-[var(--text-deep)]"}`}>
+                  <div
+                    className={`mt-1 truncate ${
+                      keyName === "total_compensation"
+                        ? "text-[18px] font-bold text-[#ff5a5f]"
+                        : "font-medium text-[var(--text-deep)]"
+                    }`}
+                  >
                     {displayValue(comparison.left, keyName)}
                   </div>
                 </div>
-                <div className="min-w-36 px-6 text-center">
+
+                {/* Delta */}
+                <div className="min-w-[5rem] px-3 text-center">
                   <Delta left={comparison.left} right={comparison.right} keyName={keyName} />
                 </div>
-                <div className="text-right">
+
+                {/* Right value */}
+                <div className="min-w-0 text-right">
                   <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">{label}</p>
-                  <div className={`mt-1 ${keyName === "total_compensation" ? "text-[18px] font-bold text-[#ff5a5f]" : "font-medium text-[var(--text-deep)]"}`}>
+                  <div
+                    className={`mt-1 truncate ${
+                      keyName === "total_compensation"
+                        ? "text-[18px] font-bold text-[#ff5a5f]"
+                        : "font-medium text-[var(--text-deep)]"
+                    }`}
+                  >
                     {displayValue(comparison.right, keyName)}
                   </div>
                 </div>
@@ -192,7 +252,9 @@ export function CompareClient({ salaries }: { salaries: SalaryRecord[] }) {
           </div>
         </div>
       ) : !error ? (
-        <div className="mt-6 rounded-lg border border-dashed border-[var(--border)] bg-white p-10 text-center text-[var(--text-muted)]">Pick two records to see compensation deltas.</div>
+        <div className="mt-6 rounded-lg border border-dashed border-[var(--border)] bg-white p-10 text-center text-[var(--text-muted)]">
+          Pick two records to see compensation deltas.
+        </div>
       ) : null}
     </div>
   );

@@ -8,9 +8,8 @@ import { getCompanyData } from "@/lib/company-data";
 import { prisma } from "@/lib/prisma";
 import { formatCompactMoney } from "@/lib/salary";
 import type { Level } from "@prisma/client";
-import { slugFromCompanyName } from "@/lib/company";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://talent-dash-sigma-puce.vercel.app/";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://talent-dash-sigma-puce.vercel.app";
 
 export const revalidate = 3600;
 
@@ -56,11 +55,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 function levelBarColor(level: string) {
-  if (level === "L3" || level === "SDE_I") return "#e2e8f0";
-  if (level === "L4" || level === "SDE_II") return "#dbeafe";
-  if (level === "L5" || level === "SDE_III") return "#e0e7ff";
-  if (level === "L6" || level === "STAFF") return "#f3e8ff";
-  return "#ff5a5f";
+if (level === "L3" || level === "SDE_I") return "#CBB98D"; 
+if (level === "L4" || level === "SDE_II") return "#D6BFA3"; 
+if (level === "L5" || level === "SDE_III") return "#B8A7D9"; 
+if (level === "L6" || level === "STAFF") return "#8FA8C7"; 
+return "#ff5a5f"; 
 }
 
 export default async function CompanyPage({ params }: PageProps) {
@@ -87,18 +86,20 @@ export default async function CompanyPage({ params }: PageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="rounded-lg border border-[var(--border)] bg-white p-6">
         <Badge tone="warning">{company.industry}</Badge>
-        <h1 className="mt-3 text-3xl font-bold text-[var(--text-deep)]">Software Engineer Salaries at {company.name} India</h1>
+        <h1 className="mt-3 text-3xl font-bold text-[var(--text-deep)]">Salaries at {company.name} India</h1>
         <dl className="mt-4 grid gap-3 text-sm text-[var(--text-muted)] sm:grid-cols-3">
           <div><dt className="font-semibold text-[var(--text-deep)]">Headquarters</dt><dd>{headquartersCity}</dd></div>
           <div><dt className="font-semibold text-[var(--text-deep)]">Founded</dt><dd>{company.founded_year}</dd></div>
-          <div><dt className="font-semibold text-[var(--text-deep)]">Headcount</dt><dd>{company.headcount_range}</dd></div>
+          <div><dt className="font-semibold text-[var(--text-deep)]">Headcount</dt><dd>
+            {company.headcount_range || "NA"}
+            </dd></div>
         </dl>
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-4">
         <StatCard label="Median Total Comp" value={formatCompactMoney(medianTotal, currency)} valueClassName="text-3xl text-[#ff5a5f]" />
         <StatCard label="Compensation range" value={`${formatCompactMoney(minTotal, currency)} - ${formatCompactMoney(maxTotal, currency)}`} />
-        <StatCard label="Record count" value={`Based on ${salaries.length.toLocaleString("en-IN")} data points`} />
+        <StatCard label="Record count" value={`${salaries.length.toLocaleString("en-IN")} data points`} />
         <StatCard label="Top level" value={Object.entries(levelDistribution).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A"} />
       </div>
 
