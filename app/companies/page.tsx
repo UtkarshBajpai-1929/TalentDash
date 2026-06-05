@@ -87,7 +87,7 @@ export default async function CompaniesPage() {
                 className="focus-ring inline-flex justify-center rounded-md bg-[#ff5a5f] px-4 py-2 font-semibold"
                 href={`/companies/${company.slug}`}
               >
-                <span className="text-white">View salary</span>
+                <span className="text-white">View Insights</span>
               </Link>
               <Link
                 className="focus-ring inline-flex justify-center rounded-md border border-[var(--border)] bg-white px-4 py-2 font-semibold text-[var(--text-deep)] hover:bg-[#f7f7f7]"

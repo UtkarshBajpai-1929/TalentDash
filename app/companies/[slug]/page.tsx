@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { SalaryTable } from "@/components/features/salary-table";
-import { StatCard } from "@/components/ui/stat-card";
+import { CompanySalaryInsights } from "@/components/features/company-salary-insights";
 import { Badge } from "@/components/ui/badge";
 import { getCompanyData } from "@/lib/company-data";
 import { prisma } from "@/lib/prisma";
 import { formatCompactMoney } from "@/lib/salary";
-import type { Level } from "@prisma/client";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://talent-dash-sigma-puce.vercel.app";
 
@@ -54,37 +51,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
   };
 }
-function levelBarColor(level: string) {
-if (level === "L3" || level === "SDE_I") return "#CBB98D"; 
-if (level === "L4" || level === "SDE_II") return "#D6BFA3"; 
-if (level === "L5" || level === "SDE_III") return "#B8A7D9"; 
-if (level === "L6" || level === "STAFF") return "#8FA8C7"; 
-return "#ff5a5f"; 
-}
-
 export default async function CompanyPage({ params }: PageProps) {
   const { slug } = await params;
   const data = await getCompanyData(slug);
   if (!data) notFound();
 
-  const { company, salaries, median_total_compensation: medianTotal, level_distribution: levelDistribution } = data;
-  const updatedSalaries = salaries.filter(salary=> salary.currency === "INR");
-  const { minTotal, maxTotal } = updatedSalaries.reduce(
-  (acc, salary) => ({
-    minTotal: Math.min(acc.minTotal, salary.total_compensation),
-    maxTotal: Math.max(acc.maxTotal, salary.total_compensation),
-  }),
-  {
-    minTotal: Infinity,
-    maxTotal: -Infinity,
-  }
-);
-
-const finalMin = minTotal === Infinity ? 0 : minTotal;
-const finalMax = maxTotal === -Infinity ? 0 : maxTotal;
-const currency = salaries[0]?.currency ?? "INR";
-const headquartersCity = company.headquarters.split(",")[0];
-const jsonLd = {
+  const { company, salaries, level_distribution: levelDistribution } = data;
+  const headquartersCity = company.headquarters.split(",")[0];
+  const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Dataset",
     name: `Software Engineer Salaries at ${company.name} India`,
@@ -107,42 +81,8 @@ const jsonLd = {
         </dl>
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-4">
-        <StatCard label="Median Total Comp" value={formatCompactMoney(medianTotal, currency)} valueClassName="text-3xl text-[#ff5a5f]" />
-        <StatCard label="Compensation range" value={`${formatCompactMoney(finalMin, currency)} - ${formatCompactMoney(finalMax, currency)}`} />
-        <StatCard label="Record count" value={`${salaries.length.toLocaleString("en-IN")} data points`} />
-        <StatCard label="Top level" value={Object.entries(levelDistribution).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A"} />
-      </div>
-
-      <section className="mt-6 rounded-lg border border-[var(--border)] bg-white p-5">
-        <h2 className="text-lg font-bold text-[var(--text-deep)]">Level distribution</h2>
-        <div className="mt-4 flex h-5 overflow-hidden rounded-full bg-[#f1f1f1]">
-          {Object.entries(levelDistribution).map(([level, count]) => (
-            <div
-              key={level}
-              title={`${level}: ${count} records`}
-              style={{ width: `${(count / salaries.length) * 100}%`, backgroundColor: levelBarColor(level) }}
-            />
-          ))}
-        </div>
-        <div className="mt-4 flex flex-wrap gap-3">
-          {Object.entries(levelDistribution).map(([level, count]) => (
-            <div key={level} className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
-              <Badge level={level as Level}>{level}</Badge>
-              <span>{Math.round((count / salaries.length) * 100)}%</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
       <div className="mt-6">
-        <SalaryTable salaries={salaries} displayCurrency={currency} />
-      </div>
-
-      <div className="mt-6">
-        <Link className="focus-ring inline-flex rounded-md bg-[#ff5a5f] px-4 py-2 font-semibold text-white" href={`/compare?c1=${company.slug}`}>
-          Compare with another company
-        </Link>
+        <CompanySalaryInsights company={company} salaries={salaries} />
       </div>
     </main>
   );
