@@ -41,7 +41,7 @@ export default async function CompaniesPage() {
             Company directory
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--text-deep)]">
-            Companies
+            Companies Across India
           </h1>
           <p className="mt-2 max-w-2xl text-[var(--text-muted)]">
             Explore company profiles and open their salary pages.
@@ -82,12 +82,20 @@ export default async function CompaniesPage() {
               </dl>
             </div>
 
-            <Link
-              className="focus-ring mt-5 inline-flex w-full justify-center rounded-md bg-[#ff5a5f] px-4 py-2 font-semibold"
-              href={`/companies/${company.slug}`}
-            >
-              <span className="text-white">View salary</span>
-            </Link>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <Link
+                className="focus-ring inline-flex justify-center rounded-md bg-[#ff5a5f] px-4 py-2 font-semibold"
+                href={`/companies/${company.slug}`}
+              >
+                <span className="text-white">View salary</span>
+              </Link>
+              <Link
+                className="focus-ring inline-flex justify-center rounded-md border border-[var(--border)] bg-white px-4 py-2 font-semibold text-[var(--text-deep)] hover:bg-[#f7f7f7]"
+                href={`/compare?c1=${company.slug}`}
+              >
+                Compare
+              </Link>
+            </div>
           </Card>
         ))}
       </div>

@@ -172,6 +172,13 @@ export const revalidate = 300;
 Salary listings are public content and can tolerate short-lived staleness, so the page avoids request-time rendering and unnecessary internal API calls.
 
 ---
+### `/companies`
+All the companies across the platform are listed here, featuring salary button to view all the salary details of company.
+```ts
+ const companies = await prisma.company.findMany({
+    orderBy: { name: "asc" },
+ )}
+```
 
 ### `/companies/[slug]`
 
