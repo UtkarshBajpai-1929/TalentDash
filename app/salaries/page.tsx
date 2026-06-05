@@ -23,7 +23,9 @@ export async function generateMetadata() {
       description,
       url: `${siteUrl}/salaries`,
       type: "website"
-    }
+    },
+    keywords: [
+    "software engineer salary india","amazon salary india","google software engineer salary", "salary comparison","tech compensation india","software engineer salaries","talentdash"],
   };
 }
 type PageProps = {
@@ -44,15 +46,26 @@ export default async function SalariesPage({ searchParams }: PageProps) {
   const urlSearchParams = toURLSearchParams(resolvedSearchParams);
   const filters = parseSalaryFilters(urlSearchParams);
   const data = await getSalariesData(filters);
-  const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Dataset',
-  name: 'TalentDash India Tech Salary Data',
-  description: 'Structured compensation data for software engineers and tech professionals in India',
-  url: 'https://talent-dash-sigma-puce.vercel.app/salaries',
-  creator: { '@type': 'Organization', name: 'TalentDash' },
-  keywords: ['salary', 'compensation', 'software engineer', 'India', 'tech jobs','software development'],
- };
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  name: "TalentDash India Tech Salary Data",
+  description:
+    "Structured salary and compensation data for software engineers and tech professionals in India.",
+  url: `${siteUrl}/salaries`,
+  creator: {
+    "@type": "Organization",
+    name: "TalentDash",
+    url: siteUrl,
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "TalentDash",
+  },
+  keywords: [ "salary","software engineer salary","tech compensation","India salaries","salary comparison"],
+  inLanguage: "en-IN",
+  license: "https://opensource.org/licenses/MIT"
+};
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />

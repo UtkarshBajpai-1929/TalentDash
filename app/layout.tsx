@@ -57,7 +57,7 @@ export default function RootLayout({
             __html: JSON.stringify(jsonLd),
           }}
         />
-        <header className="border-b border-(--border) bg-white">
+        <header className="border-b border-(--border) bg-white/80 sticky top-0 z-1000">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
             <Link
               href="/salaries"
